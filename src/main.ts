@@ -11,7 +11,7 @@ window.addEventListener("load", function(event) {
     if (pixi_dom != null) {
         pixi_dom.appendChild<any>(app.view);
         
-        let randomData = DataGenerator.generate_fake_data(2, 5, 10);
+        let randomData = DataGenerator.generate_fake_data(3, 8, 8);
         let visualizer = new DataVisualizer(app);
         visualizer.DrawGraph(randomData);
     }

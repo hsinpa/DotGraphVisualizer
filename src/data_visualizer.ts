@@ -1,16 +1,17 @@
 import {DataGenerator, DataStruct, GraphStruct, DataAxis} from './data_generator';
-import { Container, Application, Graphics, ColorSource } from 'pixi.js';
+import { Container, Application, Graphics, ColorSource, TextStyle, Text } from 'pixi.js';
 import { vec2 } from 'gl-matrix';
-import { RandomArbitrary, AABB, RandomRange } from './utility/UtilityMethod';
+import { RandomArbitrary, AABB, RandomRange, Clamp } from './utility/UtilityMethod';
 
 const DOTSIZE = 8;
 const BLUE = 0x38a4e8;
 const RED = 0xde0d4c;
+const BLACK = 0x000000;
 
 export class DataVisualizer {
     private m_pixiApplication: Application;
     private m_center : vec2;
-     
+    private m_fontStyle: TextStyle;
 
     constructor(pixiApplication: Application) {
         this.m_pixiApplication = pixiApplication;
@@ -19,6 +20,10 @@ export class DataVisualizer {
             this.m_pixiApplication.screen.width * 0.5,
             this.m_pixiApplication.screen.height * 0.5
         );
+
+        this.m_fontStyle = new TextStyle({
+            fontSize: 12
+        });
 
         console.log(`Width ${this.m_pixiApplication.screen.width}, Height ${this.m_pixiApplication.screen.height}`);
         console.log(`CenterX ${this.m_center[0]}, CenterY ${this.m_center[1]}`);
@@ -45,13 +50,22 @@ export class DataVisualizer {
 
             let graphDot = this.DrawData(dataset[i], cache_direction, this.m_center, containers, graphics);
             containers.push(graphDot);
+
+            //Draw Domain Name
+            console.log(dataset[i].name);
+            let text = this.DrawText(dataset[i].name, graphDot.position[0], graphDot.position[1]);
+            container.addChild(text);
         }
     }
 
     private DrawData(data: DataStruct, direction: vec2, center: vec2, axis_container: GraphStruct[], graphics: Graphics) : GraphStruct {
         let g_struct: GraphStruct = {data: data, position : vec2.create()};
 
-        let trial_count = 1;
+        let trial_count_maxstart = RandomRange(5, 15);
+        let trial_bias = Clamp( Math.ceil(trial_count_maxstart - data.size), 0, trial_count_maxstart);
+
+        console.log(`bias ${trial_bias}, size ${data.size}`);
+        let trial_count = 1 + trial_bias;
         let collision_pass = false;
         let full_size = DOTSIZE ;
         let radius = data.radius * full_size;
@@ -86,14 +100,22 @@ export class DataVisualizer {
 
         }
 
-        let rect_offset = g_struct.data.radius * DOTSIZE * 0.5;
-        graphics.beginFill(0xDE3249);
-        graphics.drawRect(g_struct.position[0] - rect_offset, g_struct.position[1] - rect_offset, g_struct.data.radius * DOTSIZE, g_struct.data.radius * DOTSIZE );
-        graphics.endFill();
+        let rect_offset = (g_struct.data.radius) * DOTSIZE * 0.5;
+        // graphics.beginFill(0xa2faba);
+        // graphics.drawRect(g_struct.position[0] - rect_offset, g_struct.position[1] - rect_offset, g_struct.data.radius * DOTSIZE, g_struct.data.radius * DOTSIZE );
+        // graphics.endFill();
 
-        //Draw Cen
+        //Draw IP
+        for (let i = 0; i < data.size; i++) {
+            g_struct.position[0] - rect_offset, g_struct.position[1]
+            let ip_pos_x = g_struct.position[0] + (RandomArbitrary( -data.radius * 0.5, data.radius* 0.5) * full_size);
+            let ip_pos_y = g_struct.position[1] + (RandomArbitrary( -data.radius* 0.5, data.radius* 0.5) * full_size);
+
+            this.DrawDot(ip_pos_x, ip_pos_y, RED, DOTSIZE, graphics);
+        }
+        
+        //Draw Domain
         this.DrawDot(g_struct.position[0], g_struct.position[1], BLUE, DOTSIZE, graphics);
-
 
         return g_struct;
     }
@@ -104,6 +126,14 @@ export class DataVisualizer {
         graphics.beginFill(color, 1);
         graphics.drawCircle(x, y, size);
         graphics.endFill();
+    }
+
+    private DrawText(body: string, x: number, y : number) : Text{
+        const basicText = new Text(body, this.m_fontStyle);
+        basicText.x = x - (basicText.width * 0.5);
+        basicText.y = y -  (basicText.height * 0.5);
+
+        return basicText;
     }
 
 

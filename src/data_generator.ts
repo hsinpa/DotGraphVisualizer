@@ -7,15 +7,15 @@ export class DataGenerator {
         let dataset : DataStruct[]  = [];
 
         for (let i = 0; i < large_data; i++) {
-            dataset.push(RandomDataStruct(dataset.length, 15, 20));
+            dataset.push(RandomDataStruct(dataset.length, 15, 25));
         }
 
         for (let i = 0; i < medium_data; i++) {
-            dataset.push(RandomDataStruct(dataset.length, 5, 10));
+            dataset.push(RandomDataStruct(dataset.length, 5, 14));
         }
 
         for (let i = 0; i < small_data; i++) {
-            dataset.push(RandomDataStruct(dataset.length, 0, 3));
+            dataset.push(RandomDataStruct(dataset.length, 0, 5));
         }
 
         return dataset;
@@ -25,9 +25,9 @@ export class DataGenerator {
 function RandomDataStruct(index: number, min: number, max: number) : DataStruct{
     let size = RandomRange(min, max);
     let radius = Math.ceil(size / 4);
-    radius = Clamp(radius, 1, max) * 2;
+    radius = (Clamp(radius, 1, max) * 2) + 1;
 
-    return {name : "data_"+index, size: RandomRange(min, max), radius: radius };
+    return {name : `data_${index}.com.tw`, size: RandomRange(min, max), radius: radius };
 }
 
 export interface DataStruct {
